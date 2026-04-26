@@ -1,0 +1,83 @@
+[package]
+edition = "2024"
+name = "espclock"
+rust-version = "1.88"
+version = "0.1.0"
+
+[[bin]]
+name = "espclock"
+path = "./src/bin/main.rs"
+
+[dependencies]
+esp-hal = { version = "~1.1.0", features = ["esp32c3", "unstable"] }
+
+esp-rtos = { version = "0.3.0", features = [
+  "esp-alloc",
+  "esp-radio",
+  "esp32c3",
+] }
+
+esp-bootloader-esp-idf = { version = "0.5.0", features = ["esp32c3"] }
+
+bleps = { git = "https://github.com/bjoernQ/bleps", package = "bleps", rev = "a5148d8ae679e021b78f53fd33afb8bb35d0b62e", features = [
+  "async",
+  "macros",
+] }
+critical-section = "1.2.0"
+embedded-io = "0.7.1"
+esp-alloc = "0.10.0"
+esp-radio = { version = "0.18.0", features = [
+  "ble",
+  "coex",
+  "esp-alloc",
+  "esp32c3",
+  "unstable",
+  "wifi",
+] }
+smoltcp = { version = "0.13.0", default-features = false, features = [
+  "medium-ethernet",
+  "multicast",
+  "proto-dhcpv4",
+  "proto-dns",
+  "proto-ipv4",
+  "socket-dns",
+  "socket-icmp",
+  "socket-raw",
+  "socket-tcp",
+  "socket-udp",
+] }
+
+defmt-rtt = "1.1.0"
+
+[target.'cfg(debug_assertions)'.dependencies]
+esp-println = { version = "0.17.0", default-features = false, features = [
+  "esp32c3",
+  "colors",
+  "auto",
+] }
+
+
+[profile.dev]
+# Rust debug is too slow.
+# For debug builds always builds with some optimization
+opt-level = "s"
+
+[profile.release]
+codegen-units = 1        # LLVM can perform better optimizations using a single thread
+debug = 2
+debug-assertions = false
+incremental = false
+lto = 'fat'
+opt-level = 's'
+overflow-checks = false
+
+[lints.clippy]
+missing_panics_doc = "allow"
+missing_errors_doc = "allow"
+correctness = { level = "deny", priority = -1 }
+suspicious = { level = "deny", priority = -1 }
+style = { level = "deny", priority = -1 }
+complexity = { level = "deny", priority = -1 }
+perf = { level = "deny", priority = -1 }
+pedantic = { level = "deny", priority = -1 }
+nursery = { level = "deny", priority = -1 }
