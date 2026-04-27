@@ -6,7 +6,7 @@ pub mod max7219;
 #[macro_export]
 macro_rules! println {
     ($($arg:tt)*) => {
-        esp_println::println!($($arg)*);
+        esp_println::println!($($arg)*)
     };
 }
 

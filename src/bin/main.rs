@@ -17,7 +17,7 @@ use esp_hal::timer::timg::TimerGroup;
 use defmt_rtt as _;
 use esp_radio::wifi::ap::AccessPointConfig;
 use esp_radio::wifi::{Config, ControllerConfig};
-use espclock::max7219::connector::{MAX_DISPLAYS, Max7219, NB_COLUMNS};
+use espclock::max7219::connector::{Intensity, MAX_DISPLAYS, Max7219, NB_COLUMNS};
 use espclock::max7219::draw::chars::{Digit, Glyph};
 use espclock::println;
 
@@ -98,6 +98,10 @@ fn main() -> ! {
     display.draw_glyphs(glyphs).unwrap();
 
     println!("Debug print");
+
+    display.draw_glyphs(glyphs).unwrap();
+
+    display.set_global_intensity(Intensity::Min).unwrap();
 
     loop {
         let delay_start = Instant::now();

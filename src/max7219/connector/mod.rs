@@ -14,7 +14,7 @@ pub mod device;
 
 use device::{Connector, PinConnector, SpiConnector, SpiConnectorSW};
 
-use crate::max7219::draw::chars::{Glyph, PackedDigit};
+use crate::max7219::draw::chars::Glyph;
 
 /// Maximum number of displays connected in series.
 pub const MAX_DISPLAYS: usize = 4;
@@ -162,6 +162,14 @@ where
         Ok(())
     }
 
+    pub fn set_global_intensity(&mut self, intensity: Intensity) -> Result<(), DataError> {
+        for i in 0..self.c.devices() {
+            self.c.write_data(i, Command::Intensity, intensity as u8)?;
+        }
+
+        Ok(())
+    }
+
     pub fn set_intensity(&mut self, addr: usize, intensity: Intensity) -> Result<(), DataError> {
         self.c.write_data(addr, Command::Intensity, intensity as u8)
     }
@@ -182,10 +190,7 @@ where
             if device_index >= device_count {
                 break;
             }
-            let cols: &[u8] = match glyph {
-                Glyph::Digit(digit) => <&PackedDigit>::from(digit),
-                Glyph::Space => &[0x00],
-            };
+            let cols: &[u8] = glyph.into();
 
             for &col_byte in cols {
                 if device_index >= device_count {

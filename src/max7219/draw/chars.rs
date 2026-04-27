@@ -1,5 +1,5 @@
 #[repr(u8)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug)]
 pub enum Digit {
     Zero = 0,
     One,
@@ -11,6 +11,36 @@ pub enum Digit {
     Seven,
     Eight,
     Nine,
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum Character {
+    A,
+    B,
+    C,
+    D,
+    E,
+    F,
+    G,
+    H,
+    I,
+    J,
+    K,
+    L,
+    M,
+    N,
+    O,
+    P,
+    Q,
+    R,
+    S,
+    T,
+    U,
+    V,
+    W,
+    X,
+    Y,
+    Z,
 }
 
 impl Digit {
@@ -34,17 +64,101 @@ impl Digit {
 
 pub type PackedDigit = [u8; 3];
 
+#[derive(Debug)]
+
 pub enum Glyph {
     Digit(Digit),
+    Character(CharacterStyle),
     Space,
+    Colon,
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum CharacterStyle {
+    Full(Character),
+    Overline(Character),
 }
 
 impl Glyph {
     #[must_use]
     pub const fn width(&self) -> usize {
         match self {
-            Self::Digit(_) => 3,
-            Self::Space => 1,
+            Self::Digit(_) | Self::Character(_) => 3,
+            Self::Space | Self::Colon => 1,
+        }
+    }
+}
+
+impl<'a> From<&'a CharacterStyle> for &'a PackedDigit {
+    fn from(c: &CharacterStyle) -> Self {
+        match c {
+            CharacterStyle::Full(character) => match character {
+                Character::A => todo!(),
+                Character::B => todo!(),
+                Character::C => todo!(),
+                Character::D => todo!(),
+                Character::E => todo!(),
+                Character::F => todo!(),
+                Character::G => todo!(),
+                Character::H => todo!(),
+                Character::I => todo!(),
+                Character::J => todo!(),
+                Character::K => todo!(),
+                Character::L => todo!(),
+                Character::M => todo!(),
+                Character::N => todo!(),
+                Character::O => todo!(),
+                Character::P => todo!(),
+                Character::Q => todo!(),
+                Character::R => todo!(),
+                Character::S => todo!(),
+                Character::T => todo!(),
+                Character::U => todo!(),
+                Character::V => todo!(),
+                Character::W => todo!(),
+                Character::X => todo!(),
+                Character::Y => todo!(),
+                Character::Z => todo!(),
+            },
+            CharacterStyle::Overline(character) => match character {
+                Character::A => todo!(),
+                Character::B => todo!(),
+                Character::C => todo!(),
+                Character::D => todo!(),
+                Character::E => todo!(),
+                Character::F => todo!(),
+                Character::G => todo!(),
+                Character::H => todo!(),
+                Character::I => todo!(),
+                Character::J => todo!(),
+                Character::K => todo!(),
+                Character::L => todo!(),
+                Character::M => todo!(),
+                Character::N => todo!(),
+                Character::O => todo!(),
+                Character::P => todo!(),
+                Character::Q => todo!(),
+                Character::R => todo!(),
+                Character::S => todo!(),
+                Character::T => todo!(),
+                Character::U => todo!(),
+                Character::V => todo!(),
+                Character::W => todo!(),
+                Character::X => todo!(),
+                Character::Y => todo!(),
+                Character::Z => todo!(),
+            },
+        }
+    }
+}
+
+impl<'a> From<&'a Glyph> for &'a [u8] {
+    fn from(d: &'a Glyph) -> Self {
+        match d {
+            Glyph::Digit(digit) => <&'a PackedDigit>::from(digit),
+            Glyph::Character(character_style) => <&'a PackedDigit>::from(character_style),
+            Glyph::Space => &[0b0000_0000],
+            Glyph::Colon => &[0b0010_0100],
         }
     }
 }
