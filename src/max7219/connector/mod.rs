@@ -132,9 +132,15 @@ pub enum DataError {
     ConversionError,
 }
 
+#[derive(PartialEq, Eq)]
+pub enum Direction {
+    TopBottom,
+    BottomTop,
+}
 pub struct Max7219<CONNECTOR> {
     c: CONNECTOR,
     decode_mode: DecodeMode,
+    direction: Direction,
 }
 
 impl<CONNECTOR> Max7219<CONNECTOR>
@@ -205,9 +211,19 @@ where
                     }
                 }
 
-                let bit_pos = 7 - col_offset;
+                let bit_pos = if self.direction == Direction::TopBottom {
+                    7 - col_offset
+                } else {
+                    col_offset
+                };
+
                 for (row, row_item) in row_data.iter_mut().enumerate() {
-                    let lit = (col_byte >> (7 - row)) & 1;
+                    let applied_row = if self.direction == Direction::TopBottom {
+                        7 - row
+                    } else {
+                        row
+                    };
+                    let lit = (col_byte >> (applied_row)) & 1;
                     if lit != 0 {
                         row_item[device_index] |= 1 << bit_pos;
                     }
@@ -220,8 +236,14 @@ where
 
         for (row_index, digit_register) in Command::digits().enumerate() {
             for (dev, _) in row_data.iter().enumerate().take(used_devices) {
+                let hw_dev = if self.direction == Direction::TopBottom {
+                    dev
+                } else {
+                    used_devices - 1 - dev
+                };
+
                 self.c
-                    .write_raw(dev, digit_register.addr(), row_data[row_index][dev])?;
+                    .write_raw(hw_dev, digit_register.addr(), row_data[row_index][dev])?;
             }
         }
 
@@ -236,10 +258,11 @@ where
         }
     }
 
-    pub fn new(connector: CONNECTOR) -> Result<Self, DataError> {
+    pub fn new(connector: CONNECTOR, direction: Direction) -> Result<Self, DataError> {
         let mut max7219 = Self {
             c: connector,
             decode_mode: DecodeMode::NoDecode,
+            direction,
         };
         max7219.init()?;
         Ok(max7219)
@@ -276,7 +299,10 @@ impl<'d> Max7219<PinConnector<'d>> {
         cs: Output<'d>,
         sck: Output<'d>,
     ) -> Result<Self, DataError> {
-        Max7219::new(PinConnector::new(displays, data, cs, sck))
+        Max7219::new(
+            PinConnector::new(displays, data, cs, sck),
+            Direction::TopBottom,
+        )
     }
 }
 
@@ -292,8 +318,12 @@ impl<'d> Max7219<SpiConnector<'d>> {
     /// * `displays` - number of displays connected in series
     /// * `spi`      - the SPI interface (MOSI, MISO unused, CLK)
     ///
-    pub fn from_spi(displays: usize, spi: Spi<'d, esp_hal::Blocking>) -> Result<Self, DataError> {
-        Max7219::new(SpiConnector::new(displays, spi))
+    pub fn from_spi(
+        displays: usize,
+        spi: Spi<'d, esp_hal::Blocking>,
+        direction: Direction,
+    ) -> Result<Self, DataError> {
+        Max7219::new(SpiConnector::new(displays, spi), direction)
     }
 }
 
@@ -314,7 +344,8 @@ impl<'d> Max7219<SpiConnectorSW<'d>> {
         displays: usize,
         spi: Spi<'d, esp_hal::Blocking>,
         cs: Output<'d>,
+        direction: Direction,
     ) -> Result<Self, DataError> {
-        Max7219::new(SpiConnectorSW::new(displays, spi, cs))
+        Max7219::new(SpiConnectorSW::new(displays, spi, cs), direction)
     }
 }

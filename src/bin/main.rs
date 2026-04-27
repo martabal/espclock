@@ -17,7 +17,7 @@ use esp_hal::timer::timg::TimerGroup;
 use defmt_rtt as _;
 use esp_radio::wifi::ap::AccessPointConfig;
 use esp_radio::wifi::{Config, ControllerConfig};
-use espclock::max7219::connector::{Intensity, MAX_DISPLAYS, Max7219, NB_COLUMNS};
+use espclock::max7219::connector::{Direction, Intensity, MAX_DISPLAYS, Max7219, NB_COLUMNS};
 use espclock::max7219::draw::chars::{Digit, Glyph};
 use espclock::println;
 
@@ -70,7 +70,7 @@ fn main() -> ! {
         .with_mosi(mosi)
         .with_cs(cs);
 
-    let mut display = Max7219::from_spi(4, spi).unwrap();
+    let mut display = Max7219::from_spi(4, spi, Direction::TopBottom).unwrap();
     display.power_on().unwrap();
 
     let glyphs: &[Glyph] = &[
