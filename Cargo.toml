@@ -29,7 +29,7 @@ esp-radio = { version = "0.18.0", features = [
   "unstable",
   "wifi",
 ] }
-smoltcp = { version = "0.13.0", default-features = false, features = [
+smoltcp = { version = "0.13.1", default-features = false, features = [
   "medium-ethernet",
   "multicast",
   "proto-dhcpv4",
